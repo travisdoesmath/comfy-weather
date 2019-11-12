@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
 <style type="text/css">
 
 /* On mouse hover, lighten state color */
@@ -69,6 +70,31 @@ var path = d3.geoPath()               // path generator that will convert GeoJSO
 var color = d3.scaleLinear()
 			  .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
 
+var slider = d3
+    .sliderHorizontal()
+    .min(0)
+    .max(100)
+    .step(1)
+    .width(300)
+    .default([25,85])
+    .fill('#2196f3')
+    .on('onchange', val => {
+        drawStations(slider.value());
+    })
+
+console.log(slider.value())
+
+d3.select("body")
+    .append("div")
+    .attr("id","slider")
+    .append("svg")
+    .attr("width", 500)
+    .attr("height", 100)
+    .append("g")
+    .attr("transform","translate(30,30)")
+    .call(slider)
+
+
 //Create SVG element and append map to the SVG
 var svg = d3.select("body")
 			.append("svg")
@@ -82,6 +108,7 @@ var div = d3.select("body")
             .style("width", "100px")               
     		.style("opacity", 0);
 
+
 var files = [{"func":d3.json,"filename":"us-states.json"},
              {"func":d3.csv,"filename":"stations.csv"},]
     promises = [];
@@ -92,40 +119,15 @@ files.forEach(function(file) {
 
 var globalStations;
 
-Promise.all(promises).then(function(values) {
-    console.log(values);
-    states = values[0];
-    stations = values[1];
+function drawStations(range) {
 
-    globalStations = values[1];
+    comfyStations = stations.filter(x => x.min_05 > range[0] && x.max_95 < range[1]);
 
-    comfyStations = stations.filter(x => x.min_05 > 35 && x.max_95 < 90);
+    stations_circles = svg
+        .selectAll("circle")
+        .data(comfyStations, x => x.Name)
 
-    // Bind the data to the SVG and create one path per GeoJSON feature
-    svg.selectAll("path")
-        .data(states.features)
-        .enter()
-        .append("path")
-        .attr("d", path)
-        .style("stroke", "#fff")
-        .style("stroke-width", "1")
-        .style("fill", function(d) {
-
-        // Get data value
-        var value = d.properties.visited;
-
-        if (value) {
-        //If value exists…
-        return color(value);
-        } else {
-        //If value is undefined…
-        return "rgb(213,222,217)";
-        }
-    });
-
-    svg.selectAll("circle")
-        .data(comfyStations)
-        .enter()
+    stations_circles.enter()
         .append("circle")
         .attr("cx", function(d) {
             return projection([d.Longitude, d.Latitude])[0];
@@ -151,7 +153,44 @@ Promise.all(promises).then(function(values) {
             div.transition()        
             .duration(500)      
             .style("opacity", 0);   
-        });
+        })
+
+    stations_circles
+        .exit()
+        .remove()
+}
+
+
+Promise.all(promises).then(function(values) {
+    console.log(values);
+    states = values[0];
+    stations = values[1];
+
+    globalStations = values[1];
+
+    // Bind the data to the SVG and create one path per GeoJSON feature
+    svg.selectAll("path")
+        .data(states.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .style("stroke", "#fff")
+        .style("stroke-width", "1")
+        .style("fill", function(d) {
+
+        // Get data value
+        var value = d.properties.visited;
+
+        if (value) {
+        //If value exists…
+        return color(value);
+        } else {
+        //If value is undefined…
+        return "rgb(213,222,217)";
+        }
+    });
+
+    drawStations([25,85]) // convert to values from range element
 })
 
 </script>
