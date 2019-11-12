@@ -121,7 +121,7 @@ var globalStations;
 
 function drawStations(range) {
 
-    comfyStations = stations.filter(x => x.min_05 > range[0] && x.max_95 < range[1]);
+    comfyStations = stations.filter(x => x.min > range[0] && x.max < range[1]);
 
     stations_circles = svg
         .selectAll("circle")
@@ -145,7 +145,7 @@ function drawStations(range) {
             div.transition()        
             .duration(200)      
             .style("opacity", .9);      
-            div.html(d.Name + "<br>" + d.min_05 + "° to " + d.max_95 + "°")
+            div.html(d.Name + "<br>" + d.min + "° to " + d.max + "°")
             .style("left", (d3.event.pageX) + "px")     
             .style("top", (d3.event.pageY - 28) + "px");    
         })   
