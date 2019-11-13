@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="https://unpkg.com/d3-simple-slider"></script>
+<script src="https://kit.fontawesome.com/56516660c8.js" crossorigin="anonymous"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <style type="text/css">
 
 /* On mouse hover, lighten state color */
@@ -38,6 +41,7 @@ body {
 </style>
 </head>
 <body>
+    <div class="container" id="body"></div>
 <script type="text/javascript">
 
 /*  This visualization was made possible by modifying code provided by:
@@ -51,6 +55,12 @@ http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
 Mike Bostock, Pie Chart Legend
 http://bl.ocks.org/mbostock/3888852  */
 
+
+var pageState = {
+    'tempRange':[25,85],
+    'incomeRange':[800,1200],
+    'precipValue':35
+}
 		
 //Width and height of map
 var width = 960;
@@ -70,33 +80,101 @@ var path = d3.geoPath()               // path generator that will convert GeoJSO
 var color = d3.scaleLinear()
 			  .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
 
-var slider = d3
+var tempSlider = d3
     .sliderHorizontal()
-    .min(0)
-    .max(100)
+    .tickFormat(x => x + "°")
+    .min(-30)
+    .max(120)
     .step(1)
     .width(300)
-    .default([25,85])
+    .default(pageState.tempRange)
     .fill('#2196f3')
     .on('onchange', val => {
-        drawStations(slider.value());
+        pageState.tempRange = val
+        drawStations();
     })
 
-console.log(slider.value())
+var incomeSlider = d3
+    .sliderHorizontal()
+    .tickFormat(d3.format('$'))
+    .ticks(5)
+    .min(0)
+    .max(3500)
+    .step(100)
+    .width(300)
+    .default(pageState.incomeRange)
+    .fill('#2196f3')
+    .on('onchange', val => {
+        pageState.incomeRange = val
+        drawStations();
+    })
 
-d3.select("body")
+var precipSlider = d3
+    .sliderHorizontal()
+    .tickFormat(x => x + '"')
+    .ticks(5)
+    .min(0)
+    .max(250)
+    .step(1)
+    .width(300)
+    .default(pageState.precipValue)
+    .fill('#2196f3')
+    .on('onchange', val => {
+        pageState.precipValue = val
+        drawStations();
+    })
+
+var tempSliderDiv = d3.select("#body")
     .append("div")
-    .attr("id","slider")
-    .append("svg")
+    .attr("class","text-center")
+
+tempSliderDiv.append("i")
+    .attr("class", "fas fa-thermometer-half fa-4x")
+    .attr("title", "temperature normals")
+    .style("color","#BBB")
+
+tempSliderDiv.append("svg")
     .attr("width", 500)
     .attr("height", 100)
     .append("g")
     .attr("transform","translate(30,30)")
-    .call(slider)
+    .call(tempSlider)
+
+var incomeSliderDiv = d3.select("#body")
+    .append("div")
+    .attr("class","text-center")
+
+incomeSliderDiv.append("i")
+    .attr("class", "fas fa-money-bill-wave fa-4x")
+    .attr("title", "average weekly income")
+    .style("color","#BBB")
+
+incomeSliderDiv.append("svg")
+    .attr("width", 500)
+    .attr("height", 100)
+    .append("g")
+    .attr("transform","translate(30,30)")
+    .call(incomeSlider)
+
+var precipSliderDiv = d3.select("#body")
+    .append("div")
+    .attr("class","text-center")
+
+precipSliderDiv.append("i")
+    .attr("class", "fas fa-cloud-showers-heavy fa-4x")
+    .attr("title", "annual rainfall")
+    .style("color","#BBB")
+
+precipSliderDiv.append("svg")
+    .attr("width", 500)
+    .attr("height", 100)
+    .append("g")
+    .attr("transform","translate(30,30)")
+    .call(precipSlider)
 
 
 //Create SVG element and append map to the SVG
-var svg = d3.select("body")
+var svg = d3.select("#body")
 			.append("svg")
 			.attr("width", width)
 			.attr("height", height);
@@ -110,7 +188,7 @@ var div = d3.select("body")
 
 
 var files = [{"func":d3.json,"filename":"us-states.json"},
-             {"func":d3.csv,"filename":"stations.csv"},]
+             {"func":d3.csv,"filename":"data.csv"},]
     promises = [];
 
 files.forEach(function(file) {
@@ -119,9 +197,14 @@ files.forEach(function(file) {
 
 var globalStations;
 
-function drawStations(range) {
+function drawStations() {
 
-    comfyStations = stations.filter(x => x.min > range[0] && x.max < range[1]);
+    comfyStations = stations
+        .filter(x => x.min_temp > pageState.tempRange[0])
+        .filter(x => x.max_temp < pageState.tempRange[1])
+        .filter(x => x.AVG_WEEKLY_WAGE > pageState.incomeRange[0])
+        .filter(x => x.AVG_WEEKLY_WAGE < pageState.incomeRange[1])
+        .filter(x => x.annual_precipitation < pageState.precipValue)
 
     stations_circles = svg
         .selectAll("circle")
@@ -145,7 +228,7 @@ function drawStations(range) {
             div.transition()        
             .duration(200)      
             .style("opacity", .9);      
-            div.html(d.Name + "<br>" + d.min + "° to " + d.max + "°")
+            div.html(d.Name + "<br>" + d3.format('.1f')(d.min) + "° to " + d3.format('.1f')(d.max) + "°")
             .style("left", (d3.event.pageX) + "px")     
             .style("top", (d3.event.pageY - 28) + "px");    
         })   
@@ -190,7 +273,7 @@ Promise.all(promises).then(function(values) {
         }
     });
 
-    drawStations([25,85]) // convert to values from range element
+    drawStations() // convert to values from range element
 })
 
 </script>
