@@ -69,12 +69,12 @@ var pageState = {
 		
 //Width and height of map
 var width = 960;
-var height = 500;
+var height = 600;
 
 // D3 Projection
 var projection = d3.geoAlbersUsa()
 				   .translate([width/2, height/2])    // translate to center of screen
-				   .scale([1000]);          // scale things down so see entire US
+				   .scale([1250]);          // scale things down so see entire US
         
 // Define path generator
 var path = d3.geoPath()               // path generator that will convert GeoJSON to SVG paths
@@ -207,11 +207,12 @@ precipSliderDiv.append("svg")
 //Create SVG element and append map to the SVG
 var svg = d3.select("#body")
             .append("div").classed("row", true).classed("justify-content-center", true)
+            .append("div").classed("col-xs-12",true).classed("col-lg-6",true)
 			.append("svg")
 			// .attr("width", width)
 			// .attr("height", height);
             .attr("viewBox", `0 0 ${width} ${height}`)
-            .style('width', `${width}px`)
+            .style('width', `100%`)
 
 var g = svg.append("g");
 
