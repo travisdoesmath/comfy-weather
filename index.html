@@ -14,6 +14,10 @@ path:hover {
 	fill-opacity: .7;
 }
 
+/* div {
+    border: 1px solid black;
+} */
+
 /* Style for Custom Tooltip */
 div.tooltip {   
  	position: absolute;           
@@ -41,7 +45,9 @@ body {
 </style>
 </head>
 <body>
-    <div class="container" id="body"></div>
+    <div class="container" id="body">
+        <h1 class="text-center"></h1>
+    </div>
 <script type="text/javascript">
 
 /*  This visualization was made possible by modifying code provided by:
@@ -86,7 +92,7 @@ var tempSlider = d3
     .min(-30)
     .max(120)
     .step(1)
-    .width(300)
+    .width(450)
     .default(pageState.tempRange)
     .fill('#2196f3')
     .on('onchange', val => {
@@ -101,7 +107,7 @@ var incomeSlider = d3
     .min(0)
     .max(3500)
     .step(100)
-    .width(300)
+    .width(450)
     .default(pageState.incomeRange)
     .fill('#2196f3')
     .on('onchange', val => {
@@ -116,7 +122,7 @@ var precipSlider = d3
     .min(0)
     .max(100)
     .step(1)
-    .width(300)
+    .width(450)
     .default(pageState.precipValue)
     .fill('#2196f3')
     .on('onchange', val => {
@@ -126,62 +132,73 @@ var precipSlider = d3
 
 var tempSliderDiv = d3.select("#body")
     .append("div")
-    .classed("text-center", true)
-    // .classed("row", true)
-    // .classed("justify-content-center", true)
-    // .classed("align-items-center", true)
+    .classed("row", true)
+    .classed("justify-content-center", true)
+    .classed("align-items-center", true)
+    .append("div")
+    .classed("col-xs-12 col-lg-8", true)
 
-tempSliderDiv
-    // .append("div")
-    // .classed("col-md-1", true)
-    .append("i")
-    .attr("class", "fas fa-thermometer-half fa-4x")
+
+tempSliderDiv.append("i")
+    .attr("class", "fas fa-thermometer-half fa-fw fa-4x")
     .attr("title", "temperature normals")
     .style("color","#BBB")
-    .style("width","64px")
+    .style("width","10%")
 
 tempSliderDiv
-    // .append("div")
-    // .classed("col-md-5", true)
     .append("svg")
-    .attr("width", 500)
-    .attr("height", 100)
+    // .attr("width", 500)
+    // .attr("height", 100)
+    .style("width","90%")
+    .attr("viewBox", `0 0 500 60`)
     .append("g")
-    .attr("transform","translate(30,30)")
+    .attr("transform","translate(20,20)")
     .call(tempSlider)
 
 var incomeSliderDiv = d3.select("#body")
     .append("div")
-    .attr("class","text-center")
+    .classed("row", true)
+    .classed("justify-content-center", true)
+    .classed("align-items-center", true)
+    .append("div")
+    .classed("col-xs-12 col-lg-8", true)
 
 incomeSliderDiv.append("i")
-    .attr("class", "fas fa-money-bill-wave fa-4x")
+    .attr("class", "fas fa-money-bill-wave fa-fw fa-4x")
     .attr("title", "average weekly income")
     .style("color","#BBB")
-    .style("width","64px")
+    .style("width","10%")
 
 incomeSliderDiv.append("svg")
-    .attr("width", 500)
-    .attr("height", 100)
+    // .attr("width", 500)
+    // .attr("height", 100)
+    .style("width","90%")
+    .attr("viewBox", `0 0 500 60`)
     .append("g")
-    .attr("transform","translate(30,30)")
+    .attr("transform","translate(20,20)")
     .call(incomeSlider)
 
 var precipSliderDiv = d3.select("#body")
     .append("div")
-    .attr("class","text-center")
+    .classed("row", true)
+    .classed("justify-content-center", true)
+    .classed("align-items-center", true)
+    .append("div")
+    .classed("col-xs-12 col-lg-8", true)
 
 precipSliderDiv.append("i")
-    .attr("class", "fas fa-cloud-showers-heavy fa-4x")
+    .attr("class", "fas fa-cloud-showers-heavy fa-fw fa-4x")
     .attr("title", "annual rainfall")
     .style("color","#BBB")
-    .style("width","64px")
+    .style("width","10%")
 
 precipSliderDiv.append("svg")
-    .attr("width", 500)
-    .attr("height", 100)
+    // .attr("width", 500)
+    // .attr("height", 100)
+    .style("width","90%")
+    .attr("viewBox", `0 0 500 60`)
     .append("g")
-    .attr("transform","translate(30,30)")
+    .attr("transform","translate(20,20)")
     .call(precipSlider)
 
     const zoom = d3.zoom()
@@ -190,10 +207,12 @@ precipSliderDiv.append("svg")
 
 //Create SVG element and append map to the SVG
 var svg = d3.select("#body")
+            .append("div").classed("row", true).classed("justify-content-center", true)
 			.append("svg")
 			// .attr("width", width)
 			// .attr("height", height);
             .attr("viewBox", `0 0 ${width} ${height}`)
+            .style('width', `${width}px`)
 
 var g = svg.append("g");
 
