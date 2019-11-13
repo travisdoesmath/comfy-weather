@@ -59,7 +59,7 @@ http://bl.ocks.org/mbostock/3888852  */
 var pageState = {
     'tempRange':[25,85],
     'incomeRange':[800,1200],
-    'precipValue':35
+    'precipValue':[0,35]
 }
 		
 //Width and height of map
@@ -204,7 +204,8 @@ function drawStations() {
         .filter(x => x.max_temp < pageState.tempRange[1])
         .filter(x => x.AVG_WEEKLY_WAGE > pageState.incomeRange[0])
         .filter(x => x.AVG_WEEKLY_WAGE < pageState.incomeRange[1])
-        .filter(x => x.annual_precipitation < pageState.precipValue)
+        .filter(x => x.annual_precipitation > pageState.precipValue[0])
+        .filter(x => x.annual_precipitation < pageState.precipValue[1])
 
     stations_circles = svg
         .selectAll("circle")
@@ -228,7 +229,7 @@ function drawStations() {
             div.transition()        
             .duration(200)      
             .style("opacity", .9);      
-            div.html(d.Name + "<br>" + d3.format('.1f')(d.min) + "° to " + d3.format('.1f')(d.max) + "°")
+            div.html(d.Name + "<br>" + d3.format('.1f')(d.min_temp) + "° to " + d3.format('.1f')(d.max_temp) + "°")
             .style("left", (d3.event.pageX) + "px")     
             .style("top", (d3.event.pageY - 28) + "px");    
         })   
