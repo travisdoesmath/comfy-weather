@@ -7,6 +7,7 @@
 <script src="https://kit.fontawesome.com/56516660c8.js" crossorigin="anonymous"></script>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.js"></script>
 <style type="text/css">
 
 /* On mouse hover, lighten state color */
@@ -62,9 +63,9 @@ http://bl.ocks.org/mbostock/3888852  */
 
 
 var pageState = {
-    'tempRange':[20,90],
-    'incomeRange':[500,1500],
-    'precipValue':[0,60]
+    'tempRange':[25,85],
+    'incomeRange':[800,1200],
+    'precipValue':[0,50]
 }
 		
 //Width and height of map
@@ -229,7 +230,7 @@ var div = d3.select("body")
     		.style("opacity", 0);
 
 
-var files = [{"func":d3.json,"filename":"us-states.json"},
+var files = [{"func":d3.json,"filename":"counties-10m.json"},
              {"func":d3.csv,"filename":"data.csv"},]
     promises = [];
 
@@ -278,8 +279,7 @@ function drawStations() {
             div.transition()        
             .duration(200)      
             .style("opacity", .9);      
-            // div.html(d.COUNTY_NAME + "<br>" + d3.format('.1f')(d.min_temp) + "° to " + d3.format('.1f')(d.max_temp) + "°" + "<br>")
-            div.html(`${d.COUNTY_NAME}<br>${d3.format('.1f')(d.min_temp)}° to ${d3.format('.1f')(d.max_temp)}°<br>${d.annual_precipitation}\"<br>${d3.format('$')(d.AVG_WEEKLY_WAGE)}`)
+            div.html(d.COUNTY_NAME + "<br>" + d3.format('.1f')(d.min_temp) + "° to " + d3.format('.1f')(d.max_temp) + "°")
             .style("left", (d3.event.pageX) + "px")     
             .style("top", (d3.event.pageY - 28) + "px");    
         })   
@@ -302,36 +302,37 @@ function zoomed() {
     dataLayer.attr('transform', d3.event.transform);
 }
 
+var globalUs;
 
 Promise.all(promises).then(function(values) {
     console.log(values);
-    states = values[0];
+    us = values[0];
     stations = values[1];
 
+    globalUs = us;
     globalStations = values[1];
 
-    // Bind the data to the SVG and create one path per GeoJSON feature
-    mapLayer.selectAll("path")
-        .data(states.features)
+    mapLayer.selectAll(".county")
+        .data(topojson.feature(us, us.objects.counties).features)
         .enter()
         .append("path")
         .classed("zoom",true)
+        .classed("county", true)
         .attr("d", path)
-        .style("stroke", "#fff")
-        .style("stroke-width", "1")
-        .style("fill", function(d) {
+        .style("stroke", "#FFF")
+        .style("stroke-width", "0.5")
+        .style("fill", "#888");
 
-        // Get data value
-        var value = d.properties.visited;
-
-        if (value) {
-        //If value exists…
-        return color(value);
-        } else {
-        //If value is undefined…
-        return "rgb(213,222,217)";
-        }
-    });
+    mapLayer.selectAll(".state")
+        .data(topojson.feature(us, us.objects.states).features)
+        .enter()
+        .append("path")
+        .classed("zoom",true)
+        .classed("state",true)
+        .attr("d", path)
+        .style("stroke", "#FFF")
+        .style("stroke-width", "2")
+        .style("fill", "none")
 
     drawStations() // convert to values from range element
 })
