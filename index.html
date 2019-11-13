@@ -45,8 +45,7 @@ body {
 </style>
 </head>
 <body>
-    <div class="container" id="body">
-        <h1 class="text-center"></h1>
+    <div id="body">
     </div>
 <script type="text/javascript">
 
@@ -136,7 +135,7 @@ var tempSliderDiv = d3.select("#body")
     .classed("justify-content-center", true)
     .classed("align-items-center", true)
     .append("div")
-    .classed("col-xs-12 col-lg-8", true)
+    .classed("col-xs-12 col-lg-6", true)
 
 
 tempSliderDiv.append("i")
@@ -161,7 +160,7 @@ var incomeSliderDiv = d3.select("#body")
     .classed("justify-content-center", true)
     .classed("align-items-center", true)
     .append("div")
-    .classed("col-xs-12 col-lg-8", true)
+    .classed("col-xs-12 col-lg-6", true)
 
 incomeSliderDiv.append("i")
     .attr("class", "fas fa-money-bill-wave fa-fw fa-4x")
@@ -184,7 +183,7 @@ var precipSliderDiv = d3.select("#body")
     .classed("justify-content-center", true)
     .classed("align-items-center", true)
     .append("div")
-    .classed("col-xs-12 col-lg-8", true)
+    .classed("col-xs-12 col-lg-6", true)
 
 precipSliderDiv.append("i")
     .attr("class", "fas fa-cloud-showers-heavy fa-fw fa-4x")
