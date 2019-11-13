@@ -184,13 +184,23 @@ precipSliderDiv.append("svg")
     .attr("transform","translate(30,30)")
     .call(precipSlider)
 
+    const zoom = d3.zoom()
+      .scaleExtent([1, 8])
+      .on('zoom', zoomed);
 
 //Create SVG element and append map to the SVG
 var svg = d3.select("#body")
 			.append("svg")
 			.attr("width", width)
 			.attr("height", height);
-        
+
+var g = svg.append("g");
+
+var mapLayer = g.append('g');
+var dataLayer = g.append('g');
+
+svg.call(zoom)
+
 // Append Div for tooltip to SVG
 var div = d3.select("body")
 		    .append("div")   
@@ -219,7 +229,7 @@ function drawStations() {
         .filter(x => x.annual_precipitation > pageState.precipValue[0])
         .filter(x => x.annual_precipitation < pageState.precipValue[1])
 
-    stations_circles = svg
+    stations_circles = dataLayer
         .selectAll("circle")
         .data(comfyStations, x => x.Name)
 
@@ -233,8 +243,9 @@ function drawStations() {
         })
         .attr("r", function(d) {
             // return Math.sqrt(d.years) * 4;
-            return 4;
+            return 1.5;
         })
+        .classed("zoom",true)
         .style("fill", "rgb(217,91,67)")	
         .style("opacity", 0.85)	
         .on("mouseover", function(d) {      
@@ -256,6 +267,14 @@ function drawStations() {
         .remove()
 }
 
+function zoomed() {
+    mapLayer
+    .selectAll('.zoom') // To prevent stroke width from scaling
+    .attr('transform', d3.event.transform);
+
+    dataLayer.attr('transform', d3.event.transform);
+}
+
 
 Promise.all(promises).then(function(values) {
     console.log(values);
@@ -265,10 +284,11 @@ Promise.all(promises).then(function(values) {
     globalStations = values[1];
 
     // Bind the data to the SVG and create one path per GeoJSON feature
-    svg.selectAll("path")
+    mapLayer.selectAll("path")
         .data(states.features)
         .enter()
         .append("path")
+        .classed("zoom",true)
         .attr("d", path)
         .style("stroke", "#fff")
         .style("stroke-width", "1")
