@@ -49,22 +49,13 @@ body {
     </div>
 <script type="text/javascript">
 
-/*  This visualization was made possible by modifying code provided by:
-
-Scott Murray, Choropleth example from "Interactive Data Visualization for the Web" 
-https://github.com/alignedleft/d3-book/blob/master/chapter_12/05_choropleth.html   
-		
-Malcolm Maclean, tooltips example tutorial
-http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-
-Mike Bostock, Pie Chart Legend
-http://bl.ocks.org/mbostock/3888852  */
-
-
 var pageState = {
     'tempRange':[20,90],
     'incomeRange':[500,1500],
-    'precipValue':[0,60]
+    'precipRange':[0,60],
+    'daysLt32':[0,280],
+    'daysGt80':[0,365],
+    'sunRange':[12000,21000]
 }
 		
 //Width and height of map
@@ -85,124 +76,143 @@ var path = d3.geoPath()               // path generator that will convert GeoJSO
 var color = d3.scaleLinear()
 			  .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
 
-var tempSlider = d3
-    .sliderHorizontal()
-    .tickFormat(x => x + "°")
-    .min(-30)
-    .max(120)
-    .step(1)
-    .width(450)
-    .default(pageState.tempRange)
-    .fill('#2196f3')
-    .on('onchange', val => {
-        pageState.tempRange = val
-        drawStations();
-    })
-
-var incomeSlider = d3
-    .sliderHorizontal()
-    .tickFormat(d3.format('$'))
-    .ticks(5)
-    .min(0)
-    .max(3500)
-    .step(100)
-    .width(450)
-    .default(pageState.incomeRange)
-    .fill('#2196f3')
-    .on('onchange', val => {
-        pageState.incomeRange = val
-        drawStations();
-    })
-
-var precipSlider = d3
-    .sliderHorizontal()
-    .tickFormat(x => x + '"')
-    .ticks(5)
-    .min(0)
-    .max(100)
-    .step(1)
-    .width(450)
-    .default(pageState.precipValue)
-    .fill('#2196f3')
-    .on('onchange', val => {
-        pageState.precipValue = val
-        drawStations();
-    })
-
-var tempSliderDiv = d3.select("#body")
-    .append("div")
-    .classed("row", true)
-    .classed("justify-content-center", true)
-    .classed("align-items-center", true)
-    .append("div")
-    .classed("col-xs-12 col-lg-6", true)
+function createSlider(options) {
+    var Slider = d3
+        .sliderHorizontal()
+        .tickFormat(options.tickFormat)
+        .min(options.min)
+        .max(options.max)
+        .step(options.step)
+        .width(450)
+        .default(options.default)
+        .fill('#2196f3')
+        .on('onchange', options.onchange)    
+        
+    var sliderDiv = d3.select("#body")
+        .append("div")
+        .classed("row", true)
+        .classed("justify-content-center", true)
+        .classed("align-items-center", true)
+        .append("div")
+        .classed("col-xs-12 col-lg-6", true)
 
 
-tempSliderDiv.append("i")
-    .attr("class", "fas fa-thermometer-half fa-fw fa-4x")
-    .attr("title", "temperature normals")
-    .style("color","#BBB")
-    .style("width","10%")
+    sliderDiv.append("i")
+        .attr("class", `fas ${options.icon} fa-fw fa-4x`)
+        .attr("title", options.title)
+        .style("color","#BBB")
+        .style("width","10%")
 
-tempSliderDiv
-    .append("svg")
-    // .attr("width", 500)
-    // .attr("height", 100)
-    .style("width","90%")
-    .attr("viewBox", `0 0 500 60`)
-    .append("g")
-    .attr("transform","translate(20,20)")
-    .call(tempSlider)
+    sliderDiv
+        .append("svg")
+        // .attr("width", 500)
+        // .attr("height", 100)
+        .style("width","90%")
+        .attr("viewBox", `0 0 500 60`)
+        .append("g")
+        .attr("transform","translate(20,20)")
+        .call(Slider)
+}
 
-var incomeSliderDiv = d3.select("#body")
-    .append("div")
-    .classed("row", true)
-    .classed("justify-content-center", true)
-    .classed("align-items-center", true)
-    .append("div")
-    .classed("col-xs-12 col-lg-6", true)
+// temperature slider
+// createSlider({
+//     min:-30,
+//     max:120,
+//     step:1,
+//     tickFormat:x => x + "°",
+//     default:pageState.tempRange,
+//     onchange:val => {
+//             pageState.tempRange = val
+//             drawStations();
+//         },
+//     icon:'fa-thermometer-half',
+//     title:'temperature normals'
+// })
 
-incomeSliderDiv.append("i")
-    .attr("class", "fas fa-money-bill-wave fa-fw fa-4x")
-    .attr("title", "average weekly income")
-    .style("color","#BBB")
-    .style("width","10%")
+// days less than 32 slider
+createSlider({
+    min:0,
+    max:280,
+    step:1,
+    tickFormat:x => x,
+    default:pageState.daysLt32,
+    onchange:val => {
+            pageState.daysLt32 = val
+            drawStations();
+        },
+    icon:'fa-temperature-low',
+    title:'days less than 32°'
+})
 
-incomeSliderDiv.append("svg")
-    // .attr("width", 500)
-    // .attr("height", 100)
-    .style("width","90%")
-    .attr("viewBox", `0 0 500 60`)
-    .append("g")
-    .attr("transform","translate(20,20)")
-    .call(incomeSlider)
+// days greater than 80 slider
+createSlider({
+    min:0,
+    max:365,
+    step:1,
+    tickFormat:x => x,
+    default:pageState.daysGt80,
+    onchange:val => {
+            pageState.daysGt80 = val
+            drawStations();
+        },
+    icon:'fa-temperature-high',
+    title:'days greater than 80°'
+})
 
-var precipSliderDiv = d3.select("#body")
-    .append("div")
-    .classed("row", true)
-    .classed("justify-content-center", true)
-    .classed("align-items-center", true)
-    .append("div")
-    .classed("col-xs-12 col-lg-6", true)
+// income slider
+createSlider({
+    min:0,
+    max:3500,
+    step:100,
+    tickFormat:d3.format('$'),
+    default:pageState.incomeRange,
+    onchange:val => {
+            pageState.incomeRange = val
+            drawStations();
+        },
+    icon:'fa-money-bill-wave',
+    title:'average weekly income'
 
-precipSliderDiv.append("i")
-    .attr("class", "fas fa-cloud-showers-heavy fa-fw fa-4x")
-    .attr("title", "annual rainfall")
-    .style("color","#BBB")
-    .style("width","10%")
+})
 
-precipSliderDiv.append("svg")
-    // .attr("width", 500)
-    // .attr("height", 100)
-    .style("width","90%")
-    .attr("viewBox", `0 0 500 60`)
-    .append("g")
-    .attr("transform","translate(20,20)")
-    .call(precipSlider)
+// precip slider
+createSlider({
+    min:0,
+    max:100,
+    step:1,
+    tickFormat:x => x + '"',
+    default:pageState.precipRange,
+    onchange:val => {
+            pageState.precipRange = val
+            drawStations();
+        },
+    icon:'fa-cloud-showers-heavy',
+    title:'annual rainfall'
 
-    const zoom = d3.zoom()
-      .scaleExtent([1, 8])
-      .on('zoom', zoomed);
+})
+
+
+// sun slider
+createSlider({
+    min:12000,
+    max:21000,
+    step:100,
+    tickFormat:x => d3.format('.0f')(x/1000) + 'k',
+    default:pageState.sunRange,
+    onchange:val => {
+            pageState.sunRange = val
+            drawStations();
+        },
+    icon:'fa-sun',
+    title:'average daily sunlight'
+
+})
+
+
+
+const zoom = d3.zoom()
+    .scaleExtent([1, 8])
+    .on('zoom', zoomed);
 
 //Create SVG element and append map to the SVG
 var svg = d3.select("#body")
@@ -242,13 +252,21 @@ var globalStations;
 function drawStations() {
 
     comfyStations = stations
-        .filter(x => projection([x.longitude, x.latitude]) != null)
-        .filter(x => x.min_temp > pageState.tempRange[0])
-        .filter(x => x.max_temp < pageState.tempRange[1])
-        .filter(x => x.AVG_WEEKLY_WAGE > pageState.incomeRange[0])
-        .filter(x => x.AVG_WEEKLY_WAGE < pageState.incomeRange[1])
-        .filter(x => x.annual_precipitation > pageState.precipValue[0])
-        .filter(x => x.annual_precipitation < pageState.precipValue[1])
+        .filter(x => projection([+x.Longitude, +x.Latitude]) != null)
+        //.filter(x => +x.TMIN > pageState.tempRange[0])
+        //.filter(x => +x.TMAX < pageState.tempRange[1])
+        .filter(x => +x.DAYS_LT_32 > pageState.daysLt32[0])
+        .filter(x => +x.DAYS_LT_32 < pageState.daysLt32[1])
+        .filter(x => +x.DAYS_GT_80 > pageState.daysGt80[0])
+        .filter(x => +x.DAYS_GT_80 < pageState.daysGt80[1])
+        .filter(x => +x.ANN_PRECIP < pageState.precipRange[1])
+        .filter(x => +x.AVG_WEEKLY_WAGE > pageState.incomeRange[0])
+        .filter(x => +x.AVG_WEEKLY_WAGE < pageState.incomeRange[1])
+        .filter(x => +x.ANN_PRECIP > pageState.precipRange[0])
+        .filter(x => +x.ANN_PRECIP < pageState.precipRange[1])
+        .filter(x => +x.AVG_DLY_SUN > pageState.sunRange[0])
+        .filter(x => +x.AVG_DLY_SUN < pageState.sunRange[1])
+        
 
     stations_circles = dataLayer
         .selectAll("circle")
@@ -257,15 +275,15 @@ function drawStations() {
     stations_circles.enter()
         .append("circle")
         .attr("cx", function(d) {
-            if (projection([d.longitude, d.latitude])) {
-                return projection([d.longitude, d.latitude])[0];
+            if (projection([+d.Longitude, +d.Latitude])) {
+                return projection([+d.Longitude, +d.Latitude])[0];
             }
             else {
                 console.log(d);
             }
         })
         .attr("cy", function(d) {
-            return projection([d.longitude, d.latitude])[1];
+            return projection([+d.Longitude, +d.Latitude])[1];
         })
         .attr("r", function(d) {
             // return Math.sqrt(d.years) * 4;
@@ -279,7 +297,7 @@ function drawStations() {
             .duration(200)      
             .style("opacity", .9);      
             // div.html(d.COUNTY_NAME + "<br>" + d3.format('.1f')(d.min_temp) + "° to " + d3.format('.1f')(d.max_temp) + "°" + "<br>")
-            div.html(`${d.COUNTY_NAME}<br>${d3.format('.1f')(d.min_temp)}° to ${d3.format('.1f')(d.max_temp)}°<br>${d.annual_precipitation}\"<br>${d3.format('$')(d.AVG_WEEKLY_WAGE)}`)
+            div.html(`${d.COUNTY_NAME}<br>${d3.format('.1f')(d.TMIN)}° to ${d3.format('.1f')(d.TMAX)}°<br>${d3.format('.1f')(d.DAYS_LT_32)} days under 32°<br>${d3.format('.1f')(d.DAYS_GT_80)} days over 80°<br>${d.ANN_PRECIP}\"<br>${d3.format('$')(d.AVG_WEEKLY_WAGE)}`)
             .style("left", (d3.event.pageX) + "px")     
             .style("top", (d3.event.pageY - 28) + "px");    
         })   
