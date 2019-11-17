@@ -54,7 +54,7 @@ var pageState = {
     'incomeRange':[500,1500],
     'precipRange':[0,60],
     'daysLt32':[0,280],
-    'daysGt80':[0,365],
+    'daysGt80':[0,280],
     'sunRange':[12000,21000]
 }
 		
@@ -147,7 +147,7 @@ createSlider({
 // days greater than 80 slider
 createSlider({
     min:0,
-    max:365,
+    max:280,
     step:1,
     tickFormat:x => x,
     default:pageState.daysGt80,
@@ -264,8 +264,8 @@ function drawStations() {
         .filter(x => +x.AVG_WEEKLY_WAGE < pageState.incomeRange[1])
         .filter(x => +x.ANN_PRECIP > pageState.precipRange[0])
         .filter(x => +x.ANN_PRECIP < pageState.precipRange[1])
-        .filter(x => +x.AVG_DLY_SUN > pageState.sunRange[0])
-        .filter(x => +x.AVG_DLY_SUN < pageState.sunRange[1])
+        .filter(x => +x.AVG_DLY_SUN > pageState.sunRange[0] || x.AVG_DLY_SUN == '')
+        .filter(x => +x.AVG_DLY_SUN < pageState.sunRange[1] || x.AVG_DLY_SUN == '')
         
 
     stations_circles = dataLayer
