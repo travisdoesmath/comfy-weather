@@ -76,6 +76,8 @@ var path = d3.geoPath()               // path generator that will convert GeoJSO
 var color = d3.scaleLinear()
 			  .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
 
+var populationScale = d3.scaleSqrt().domain([0,10**6]).range([1,3])
+
 function createSlider(options) {
     var Slider = d3
         .sliderHorizontal()
@@ -235,7 +237,7 @@ svg.call(zoom)
 var div = d3.select("body")
 		    .append("div")   
     		.attr("class", "tooltip")
-            .style("width", "100px")               
+            // .style("width", "100px")               
     		.style("opacity", 0);
 
 
@@ -287,7 +289,7 @@ function drawStations() {
         })
         .attr("r", function(d) {
             // return Math.sqrt(d.years) * 4;
-            return 1.5;
+            return populationScale(d.POPULATION);
         })
         .classed("zoom",true)
         .style("fill", "rgb(217,91,67)")	

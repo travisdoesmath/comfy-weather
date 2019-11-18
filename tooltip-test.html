@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-simple-slider"></script>
+<script src="https://kit.fontawesome.com/56516660c8.js" crossorigin="anonymous"></script>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<style type="text/css">
+
+/* Style for Custom Tooltip */
+div.tooltip {   
+ 	position: absolute;           
+	text-align: center;
+	padding: 2px;             
+	font: 12px sans-serif;        
+	background: white;   
+	border: 0px;      
+	border-radius: 8px;           
+	pointer-events: none;         
+}
+        
+</style>
+</head>
+<body>
+    <div id="body">
+    </div>
+<script type="text/javascript">
+		
+// Append Div for tooltip to SVG
+var div = d3.select("body")
+		    .append("div")   
+    		.attr("class", "tooltip")
+            .style("width", "100px")               
+    		// .style("opacity", 0);
+
+
+var files = [{"func":d3.json,"filename":"us-states.json"},
+             {"func":d3.csv,"filename":"data.csv"},]
+    promises = [];
+
+files.forEach(function(file) {
+    promises.push(file.func(file.filename))
+})
+
+Promise.all(promises).then(function(values) {
+    console.log(values);
+    states = values[0];
+    counties = values[1];
+
+    county = counties[1234]
+
+    tooltip = d3.select(".tooltip")
+
+    var d= county;
+
+    tooltip.html(`${d.COUNTY_NAME}<br>${d3.format('.1f')(d.TMIN)}° to ${d3.format('.1f')(d.TMAX)}°<br>${d3.format('.1f')(d.DAYS_LT_32)} days under 32°<br>${d3.format('.1f')(d.DAYS_GT_80)} days over 80°<br>${d.ANN_PRECIP}\"<br>${d3.format('$')(d.AVG_WEEKLY_WAGE)}`)
+
+    
+})
+
+</script>
+</body>
+</html>
